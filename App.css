@@ -213,3 +213,19 @@
   display: flex;
   gap: 0;
 }
+
+button {
+  background-color: #222;
+  color: rgb(255, 255, 255);
+}
+
+.Start.Game {
+  background-color: #2d6cdf;
+  color: white;
+}
+
+.Tic.Tac.Toe.Box {
+  background-color: #f4f4f4;
+  color: #111;
+}
+

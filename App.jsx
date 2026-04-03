@@ -9,6 +9,7 @@ function Square({ className, label, size, onClick }) {
   );
 }
 
+
 const WINNING_LINES = [
   [0, 1, 2],
   [3, 4, 5],
@@ -19,6 +20,9 @@ const WINNING_LINES = [
   [0, 4, 8],
   [2, 4, 6],
 ];
+
+
+
 
 function calculateWinner(board) {
   for (const [a, b, c] of WINNING_LINES) {
@@ -32,7 +36,9 @@ function calculateWinner(board) {
 
 function App() {
   const [showBlankPage, setShowBlankPage] = useState(false)
-  const [board, setBoard] = useState(Array(9).fill(null));
+  const [history, setHistory] = useState([Array(9).fill(null)]);
+  const [currentMove, setCurrentMove] = useState(0);
+  const board = history[currentMove];
   const winner = calculateWinner(board);
   const movesPlayed = board.filter(Boolean).length;
   const currentTurn = movesPlayed % 2 === 0 ? "x" : "o";
@@ -57,11 +63,21 @@ function App() {
 
     const nextBoard = [...board];
     nextBoard[index] = currentTurn;
-    setBoard(nextBoard);
+    
+    const trimmedHistory = history.slice(0, currentMove + 1);
+    const nextHistory = [...trimmedHistory, nextBoard];
+
+    setHistory(nextHistory);
+    setCurrentMove(nextHistory.length - 1);
+  }
+  
+  function jumpTo(move) {
+    setCurrentMove(move);
   }
 
   function startGame() {
-    setBoard(Array(9).fill(null));
+    setHistory([Array(9).fill(null)]);
+    setCurrentMove(0);
     setShowBlankPage(true);
   }
 
@@ -92,6 +108,16 @@ function App() {
           size="100px"
           onClick={startGame}
         />
+        <div className="History">
+        <h2>Move History</h2>
+        {history.map((moveIndex) => (
+          <li key={moveIndex}>
+            <button onClick={() => jumpTo(moveIndex)}>
+              Go to move #{moveIndex}
+            </button>
+          </li>
+        ))}
+      </div>
       </div>
     )
   }
@@ -107,6 +133,7 @@ function App() {
           onClick={startGame}
         />
       </div>
+      
     </div>
   )
 }
