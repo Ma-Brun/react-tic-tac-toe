@@ -9,55 +9,89 @@ function Square({ className, label, size, onClick }) {
   );
 }
 
-function checkTurn(currentTurn) {
-  if (currentTurn === "x") {
-    return "o";
-  } else {
-    return "x";
+const WINNING_LINES = [
+  [0, 1, 2],
+  [3, 4, 5],
+  [6, 7, 8],
+  [0, 3, 6],
+  [1, 4, 7],
+  [2, 5, 8],
+  [0, 4, 8],
+  [2, 4, 6],
+];
+
+function calculateWinner(board) {
+  for (const [a, b, c] of WINNING_LINES) {
+    if (board[a] && board[a] === board[b] && board[a] === board[c]) {
+      return board[a];
+    }
   }
+
+  return null;
 }
 
 function App() {
   const [showBlankPage, setShowBlankPage] = useState(false)
-  const [currentTurn, setCurrentTurn] = useState("x");
   const [board, setBoard] = useState(Array(9).fill(null));
+  const winner = calculateWinner(board);
+  const movesPlayed = board.filter(Boolean).length;
+  const currentTurn = movesPlayed % 2 === 0 ? "x" : "o";
+  const isDraw = !winner && movesPlayed === board.length;
+
+  function getStatusMessage() {
+    if (winner) {
+      return `Winner: ${winner.toUpperCase()}`;
+    }
+
+    if (isDraw) {
+      return "It's a draw!";
+    }
+
+    return `Current turn: ${currentTurn.toUpperCase()}`;
+  }
 
   function handleSquareClick(index) {
-    if (board[index] !== null) {
+    if (board[index] !== null || winner) {
       return;
     }
 
     const nextBoard = [...board];
     nextBoard[index] = currentTurn;
     setBoard(nextBoard);
-    setCurrentTurn(checkTurn(currentTurn));
   }
 
   function startGame() {
     setBoard(Array(9).fill(null));
-    setCurrentTurn("x");
     setShowBlankPage(true);
   }
 
   if (showBlankPage) {
     return (
       <div className="App">
-        <h1>Current turn: {currentTurn.toUpperCase()}</h1>
-        <div className="board-row1">
-          <Square className ="Tic Tac Toe Box" label={board[0] || ""} size="200px" onClick={() => handleSquareClick(0)}/>
-          <Square className ="Tic Tac Toe Box" label={board[1] || ""} size="200px" onClick={() => handleSquareClick(1)}/>
-          <Square className ="Tic Tac Toe Box" label={board[2] || ""} size="200px" onClick={() => handleSquareClick(2)}/>
-        </div>
-        <div className="board-row2">
-          <Square className ="Tic Tac Toe Box" label={board[3] || ""} size="200px" onClick={() => handleSquareClick(3)}/>
-          <Square className ="Tic Tac Toe Box" label={board[4] || ""} size="200px" onClick={() => handleSquareClick(4)}/>
-          <Square className ="Tic Tac Toe Box" label={board[5] || ""} size="200px" onClick={() => handleSquareClick(5)}/>
-        </div>
-        <div className="board-row3">
-          <Square className ="Tic Tac Toe Box" label={board[6] || ""} size="200px" onClick={() => handleSquareClick(6)}/>
-          <Square className ="Tic Tac Toe Box" label={board[7] || ""} size="200px" onClick={() => handleSquareClick(7)}/>
-          <Square className ="Tic Tac Toe Box" label={board[8] || ""} size="200px" onClick={() => handleSquareClick(8)}/>
-        </div>
+        <h1>{getStatusMessage()}</h1>
+        {[0, 3, 6].map((rowStart) => (
+          <div className="board-row" key={rowStart}>
+            {board.slice(rowStart, rowStart + 3).map((square, offset) => {
+              const index = rowStart + offset;
+
+              return (
+                <Square
+                  key={index}
+                  className="Tic Tac Toe Box"
+                  label={square || ""}
+                  size="200px"
+                  onClick={() => handleSquareClick(index)}
+                />
+              );
+            })}
+          </div>
+        ))}
+        <Square
+          className="Start Game"
+          label="Play Again"
+          size="100px"
+          onClick={startGame}
+        />
       </div>
     )
   }
